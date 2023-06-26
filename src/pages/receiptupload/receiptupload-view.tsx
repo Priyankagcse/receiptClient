@@ -532,23 +532,34 @@ function Receiptupload(props: any) {
                     </div>}
                 </TabPanel>
                 <TabPanel value={state.tabIndex} index={1} className='p-0'>
-                    {Browser.isDeviceScreen ? <List className={listClasses.root}>
-                        {state.gridData.map((line: any, ind: number) => {
-                            return <ListItem className="border-bottom">
-                                <ListItemAvatar>
-                                    <Avatar variant="rounded" src={line.image} onClick={() => {
-                                        if (line.image) {
-                                            handleChange('isImageView', {isImageView: true, imageData: line.image});
-                                        } else {
-                                            props.dispatch(alertAction.error('There is No Image'));
-                                        }
-                                    }}></Avatar>
-                                </ListItemAvatar>
-                                <ListItemText primary={line.categoryTypeName} secondary={moment(new Date(line.billDate)).format(SPACED_DATE_FORMAT)} />
-                                <div>{number2FormatFn(line.amount)}</div>
-                            </ListItem>
-                        })}
-                    </List> :
+                    {Browser.isDeviceScreen ? <>
+                        <div className="p-2">
+                            <ButtonView variant="contained" color="primary" onClick={() => {
+                                if (isNullOrUndefinedOrEmpty(state.monthlyExpenseTemplateUuid)) {
+                                    props.dispatch(alertAction.error('Please Create Monthly Expense For This Month'));
+                                } else {
+                                    handleChange('isNewReceipt', {...gridObj, isNewReceipt: true})
+                                }
+                            }} startIcon={<AddIcon></AddIcon>}>Add New</ButtonView>
+                        </div>
+                        <List className={listClasses.root}>
+                            {state.gridData.map((line: any, ind: number) => {
+                                return <ListItem className="border-bottom">
+                                    <ListItemAvatar>
+                                        <Avatar variant="rounded" src={line.image} onClick={() => {
+                                            if (line.image) {
+                                                handleChange('isImageView', {isImageView: true, imageData: line.image});
+                                            } else {
+                                                props.dispatch(alertAction.error('There is No Image'));
+                                            }
+                                        }}></Avatar>
+                                    </ListItemAvatar>
+                                    <ListItemText primary={line.categoryTypeName} secondary={moment(new Date(line.billDate)).format(SPACED_DATE_FORMAT)} />
+                                    <div>{number2FormatFn(line.amount)}</div>
+                                </ListItem>
+                            })}
+                        </List>
+                    </> :
                     <div className="p-2">
                         <MuiThemeProvider theme={getMuiTheme}>
                             <MUIDataTable columns={columns} data={state.gridData} title={
@@ -583,11 +594,11 @@ function Receiptupload(props: any) {
             </DialogTitle>
             <DialogContent>
                 <div className="col-sm-12">
-                    <DatePickerView format={"dd/MM/yyyy"} label="From Date" className="col-sm-12"
+                    <DatePickerView format={"dd/MM/yyyy"} label="From Date" className="col-12 col-sm-12"
                         value={state.billDate} onChange={handleChange} field={'billDate'}></DatePickerView>
                 </div>
                 <div className="col-sm-12 mb-4">
-                    <DropDownView field={'categoryUuid'} label={'Category Type'} value={state.categoryUuid} required
+                    <DropDownView field={'categoryUuid'} label={'Category Type'} value={state.categoryUuid} required className="col-12 col-sm-12"
                         onChange={(field: string, value: any, obj: any) =>
                             handleChange(field, {categoryUuid: obj.uuid, categoryTypeName: obj.categoryTypeName})}
                         dataSource={state.dropDownSource} fields={{ text: 'categoryTypeName', value: 'uuid' }} footerTemlate={() => {
@@ -601,7 +612,7 @@ function Receiptupload(props: any) {
                         }}></DropDownView>
                 </div>
                 <div className="col-sm-12 mb-4">
-                    <DropDownView field={'bankName'} label={'Bank Type'} value={state.bankName}
+                    <DropDownView field={'bankName'} label={'Bank Type'} value={state.bankName} className="col-12 col-sm-12"
                         onChange={(field: string, value: any, obj: any) =>
                             handleChange(field, {bankUuid: obj.uuid, bankName: obj.bankName})}
                         dataSource={state.bankDropDownSource} fields={{ text: 'bankName', value: 'bankName' }} footerTemlate={() => {
@@ -614,28 +625,28 @@ function Receiptupload(props: any) {
                         }}></DropDownView>
                 </div>
                 <div className="col-sm-12 mb-4">
-                    <DropDownView field={'spentType'} label={'Spent Type'} value={state.spentType} required
+                    <DropDownView field={'spentType'} label={'Spent Type'} value={state.spentType} required className="col-12 col-sm-12"
                         onChange={(field: string, value: any, obj: any) =>
                             handleChange(field, {spentTypeUuid: obj.uuid, spentType: obj.spentType})}
                         dataSource={props.spentType} fields={{ text: 'spentType', value: 'spentType' }}>
                     </DropDownView>
                 </div>
                 <div className="col-sm-12 mb-4">
-                    <DropDownView field={'transferType'} label={'Transfer Type'} value={state.transferType} required
+                    <DropDownView field={'transferType'} label={'Transfer Type'} value={state.transferType} required className="col-12 col-sm-12"
                         onChange={(field: string, value: any, obj: any) =>
                             handleChange(field, {transferTypeUuid: obj.uuid, transferType: obj.transferType, transferId: obj.transferId})}
                         dataSource={props.transferType} fields={{ text: 'transferType', value: 'transferType' }}>
                     </DropDownView>
                 </div>
                 <div className="col-sm-12 mb-4">
-                    <TextFieldView label="Amount" type={'number'} field={'amount'} className={'col-sm-12'} required
+                    <TextFieldView label="Amount" type={'number'} field={'amount'} className="col-12 col-sm-12" required
                         value={state.amount} onChange={handleChange} />
                 </div>
                 <div className="col-sm-12 mb-4">
                     <ImageView value={state.image} field={'image'} onChange={handleChange}></ImageView>
                 </div>
                 <div className="col-sm-12 mb-4">
-                    <TextFieldView label="Description" className={'col-sm-12'} value={state.description}
+                    <TextFieldView label="Description" className="col-12 col-sm-12" value={state.description}
                         onChange={handleChange} id="filled-multiline-static" multiline rows={4} type={'text'}
                         field={'description'} />
                 </div>
