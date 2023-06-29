@@ -47,20 +47,30 @@ function MonthlyExpense(props: any) {
     
     return (<>
         {state.isEdit ? <MonthlyExpenseEditView headerData={state.headerData} getAllDatas={state.getAllDatas}
-                onClose={(expense: any) => {
-                    if (expense) {
+                onClose={(expense: any, updateFlag: boolean) => {
+                    if (updateFlag) {
                         state.getAllDatas.push(expense);
+                        handleChange('headerData', {headerData: {}, isEdit: false, getAllDatas: state.getAllDatas});
+                    } else if (expense.uuid) {
+                        let getAllDatas = state.getAllDatas.map((line: any) => {
+                            if (line.uuid === expense.uuid) {
+                                return expense;
+                            }
+                            return line;
+                        })
+                        handleChange('headerData', {headerData: {}, isEdit: false, getAllDatas: getAllDatas});
+                    } else {
+                        handleChange('headerData', {headerData: {}, isEdit: false});
                     }
-                    handleChange('headerData', {headerData: {}, isEdit: false, getAllDatas: state.getAllDatas});
                 }}>
             </MonthlyExpenseEditView> :
             <div className="col-12 col-sm-12 bg-light">
                 <div className="a-appbar">
-                    <Toolbar className="border-bottom bg-white a-sticky-t0-z101">
+                    <Toolbar className="border-bottom bg-white a-sticky-t0-z101 pe-0">
                         <IconButton edge="start" color="inherit" aria-label="menu"
                             onClick={() => {
                                 props.dispatch(menuListAction.menuSelection(false));
-                                history.push('/\menu');
+                                history.push('/\home');
                             }}>
                             <ArrowBackIcon />
                         </IconButton>

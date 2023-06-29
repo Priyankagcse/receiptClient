@@ -6,6 +6,16 @@
     }
 }
 
+.a-dialog-full {
+    .MuiDialog-container {
+        align-items: start;
+        .MuiPaper-root {
+            width: 100%;
+            margin: 0;
+        }
+    }
+}
+
 .MuiToolbar-root {
     &.a-sticky-t0-z101 {
         position: sticky;

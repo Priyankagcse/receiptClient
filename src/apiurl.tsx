@@ -30,7 +30,8 @@ export const CATEGORYTYPEAPI = () => {
 
 export const RECEIPTUPLOADAPI = () => {
     return {
-        POST: API_URL + 'receiptUpload'
+        POST: API_URL + 'receiptUpload',
+        PUT: API_URL + 'receiptUpload',
     };
 };
 
@@ -43,6 +44,7 @@ export const RECEIPTHISTORHEADERYAPI = () => {
 export const MONTHLYEXPENSE = (uuid?: string) => {
     return {
         GET: API_URL + 'monthlyExpense',
-        POST: API_URL + 'monthlyExpense'
+        POST: API_URL + 'monthlyExpense',
+        PUT: API_URL + 'monthlyExpense'
     };
 };

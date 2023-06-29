@@ -43,23 +43,23 @@ function BankDetails(props: any) {
     return (<>
         <Dialog aria-labelledby="simple-dialog-title" open={true} className={'a-dialog-md'}>
             <DialogTitle id="simple-dialog-title" className="p-0">
-                <Toolbar className="border-bottom bg-white">
+                <Toolbar className="border-bottom bg-white pe-0">
                     <IconButton edge="start" color="inherit" aria-label="menu" onClick={props.onClose}>
                         <ArrowBackIcon />
                     </IconButton>
-                    <Typography variant="h6" className="flex-grow-1">Add Bank Details</Typography>
+                    <Typography variant="h6" className="flex-grow-1">Add Bank</Typography>
                     <div className="p-2" align='right'>
-                        <ButtonView variant="contained" color="primary" onClick={() => bankDetailUpload()}>Save</ButtonView>
+                        <ButtonView className='text-primary' onClick={() => bankDetailUpload()}>Save</ButtonView>
                     </div>
                 </Toolbar>
             </DialogTitle>
             <DialogContent>
-                <div className="col-sm-12 mb-4">
-                    <TextFieldView label="Bank Name" type={'text'} field={'bankName'} className={'col-sm-12'}
+                <div className="col-12 col-sm-12 mb-4">
+                    <TextFieldView label="Bank Name" type={'text'} field={'bankName'} className={'col-12 col-sm-12'}
                         value={state.bankName} onChange={handleChange} />
                 </div>
-                <div className="col-sm-12 mb-4">
-                    <TextFieldView label="Description" className={'col-sm-12'} value={state.bankDescription}
+                <div className="col-12 col-sm-12 mb-4">
+                    <TextFieldView label="Description" className={'col-12 col-sm-12'} value={state.bankDescription}
                         onChange={handleChange} id="filled-multiline-static" multiline rows={4} type={'text'}
                         field={'bankDescription'} />
                 </div>

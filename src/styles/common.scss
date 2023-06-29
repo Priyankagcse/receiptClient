@@ -16,7 +16,6 @@ input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
 }
 
 input:disabled {
-    color: black;
     background: whitesmoke;
 }
 
@@ -68,4 +67,8 @@ input:disabled {
 
 .a-fw-md {
     font-weight: 500;
+}
+
+.a-border-radius-10 {
+    border-radius: 10px;
 }

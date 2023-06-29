@@ -20,7 +20,7 @@ function DropDown(props: any) {
     return (<>
         <FormControl className={props.className || "col-sm-12"} required={props.required}>
             <InputLabel>{props.label}</InputLabel>
-            {dataSource.length ? <Select value={props.value} className={'text-capitalize'}>
+            {dataSource.length ? <Select value={props.value} className={'text-capitalize'} disabled={props.disabled}>
                 {(dataSource || []).map((line: any, ind: number) => {
                     return <MenuItem className="text-capitalize" value={line[props.fields.value]} key={ind}
                         onClick={(event: any) => {

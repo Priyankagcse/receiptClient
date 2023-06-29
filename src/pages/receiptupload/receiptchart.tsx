@@ -56,7 +56,7 @@ export function ReceiptChartView(props: any) {
                 // }
             };
             return <div className="col-12 col-sm-3" key={ind}>
-                <div className='col-12 col-sm-12 pb-4 fw-bold'>{line.name}</div>
+                {props.hideHeader ? <></> : <div className='col-12 col-sm-12 py-2 fw-bold'>{line.name}</div>}
                 <BarChart data={data} options={options}></BarChart>
             </div>;
         })}

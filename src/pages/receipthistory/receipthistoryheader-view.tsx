@@ -15,7 +15,7 @@ import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 
 function ReceiptHistoryHeader(props: any) {
     const SPACED_DATE_FORMAT = "DD MMM YYYY";
-    const [state, setState] = React.useState({historyHeaderData: [], headerData: {}, isInitial: true});
+    const [state, setState] = React.useState({historyHeaderData: [], headerData: {}, isInitial: true, monthlyDayText: ''});
     const handleChange = (field: any, value: any) => {
         if (typeof value === 'object') {
             setState(prevState => ({
@@ -43,7 +43,7 @@ function ReceiptHistoryHeader(props: any) {
     };
     
     return (<>
-        {state.headerData['uuid'] ? <ReceiptHistoryLineView headerData={state.headerData}
+        {state.headerData['uuid'] ? <ReceiptHistoryLineView headerData={state.headerData} monthlyDayText={state.monthlyDayText}
             onClose={() => handleChange('headerData', {headerData: {uuid: ''}})} caller={'history'}></ReceiptHistoryLineView> :
             <div className="col-12 col-sm-12 bg-light">
                 <div className="a-appbar">
@@ -51,7 +51,7 @@ function ReceiptHistoryHeader(props: any) {
                         <IconButton edge="start" color="inherit" aria-label="menu"
                             onClick={() => {
                                 props.dispatch(menuListAction.menuSelection(false));
-                                history.push('/\menu');
+                                history.push('/\home');
                             }}>
                             <ArrowBackIcon />
                         </IconButton>
@@ -70,10 +70,18 @@ function ReceiptHistoryHeader(props: any) {
                                     <EditIcon fontSize={'medium'} className="text-secondary"></EditIcon>
                                 </div>
                             </div>
-                            <div className="col-12 col-sm-12">
-                                <span className="text-secondary">Total Amount: </span>
+                            {/* <div className="col-12 col-sm-12 py-1">
+                                <span className="text-secondary">Credited Amount - </span>
                                 <span>{headerData.amount}</span>
                             </div>
+                            <div className="col-12 col-sm-12 py-1">
+                                <span className="text-secondary">Debited Amount - </span>
+                                <span>{headerData.amount}</span>
+                            </div> */}
+                            {/* <div className="col-12 col-sm-12">
+                                <span className="text-secondary">Total Amount: </span>
+                                <span>{headerData.amount}</span>
+                            </div> */}
                         </div>;
                     })}
                 </div>

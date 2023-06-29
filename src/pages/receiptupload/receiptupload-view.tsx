@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { IState } from "src/initialload/state-interface";
 import { Dispatch } from "redux";
 import { Avatar, Dialog, DialogContent, DialogTitle, IconButton, ImageList,
-    ImageListItem, List, ListItem, ListItemAvatar, ListItemText, Menu, MenuItem, MuiThemeProvider, Paper, Tab, Tabs, Toolbar, Tooltip, Typography } from "@material-ui/core";
+    ImageListItem, List, ListItem, Menu, MenuItem, MuiThemeProvider, Paper, Tab, Tabs, Toolbar, Tooltip, Typography } from "@material-ui/core";
 import { menuListAction } from "../menulists/menulists-reducer";
 import MUIDataTable from "mui-datatables";
 import { history } from "src/helper/history";
@@ -28,6 +28,8 @@ import { ButtonView } from "src/component/button-view";
 import { TabPanel, tabProps } from "src/component/tab-view";
 import { listStyles } from "src/commontheme-css";
 import ArrowRightAltIcon from '@material-ui/icons/ArrowRightAlt';
+import EditIcon from '@material-ui/icons/Edit';
+import SaveIcon from '@material-ui/icons/Save';
 
 function Receiptupload(props: any) {
     const SPACED_DATE_FORMAT = "DD MMM YYYY";
@@ -39,7 +41,7 @@ function Receiptupload(props: any) {
         isInitial: true, isCategoryType: false, monthlyExpenseTemplateSource: [], dropDownSource: [],
         isBankName: false, bankDropDownSource: [], isSummary: null, monthlyExpenseTemplate: '', monthlyExpenseTemplateUuid: '',
         monthExpenseObj: {}, ...gridObj, totalAmount: 0, creditAmt: 0, monthlyTotalAmount: 0, remainingAmount: 0,
-        debitAmt: 0, tabIndex: 0, summaryTabIndex: 0
+        debitAmt: 0, tabIndex: 0, summaryTabIndex: 0, receiptUuid: ''
     });
 
     const handleChange = (field: any, value: any) => {
@@ -121,7 +123,7 @@ function Receiptupload(props: any) {
                 let filterDebit = res.receiptData.filter((line: any) => +line.transferId !== 1);
                 let debitAmt = Aggregates.sum(filterDebit, 'amount');
 
-                let currentMonthData = res.monthlyExpenseData.filter((line: any) => +line.expenseMonth + 1 === new Date().getMonth());
+                let currentMonthData = res.monthlyExpenseData.filter((line: any) => +line.expenseMonth === new Date().getMonth());
                 let currentMonthDataObj = currentMonthData[0] || {};
                 let totalAmount = (currentMonthDataObj['totalAmount'] || 0) + (creditAmt || 0);
                 let expenseAmount = (+state.monthExpenseObj['expenseAmount'] || 0) + (debitAmt || 0);
@@ -175,23 +177,39 @@ function Receiptupload(props: any) {
             if (+calcCategoryAmt < 0) {
                 props.dispatch(alertAction.error('Amount Greater than the Allocated Amount'));
             }
-            props.dispatch(apiActions.methodAction('post', RECEIPTUPLOADAPI().POST, postData, (res: any) => {
-                let gridData = state.gridData.concat([res.data]);
-
-                let filterCredit = gridData.filter((line: any) => +line.transferId === 1);
-                let creditAmt = Aggregates.sum(filterCredit, 'amount');
-
-                let filterDebit = gridData.filter((line: any) => +line.transferId !== 1);
-                let debitAmt = Aggregates.sum(filterDebit, 'amount');
-
-                let totalAmount = (state.monthlyTotalAmount || 0) + (creditAmt || 0);
-                let expenseAmount = (+state.monthExpenseObj['expenseAmount'] || 0) + (debitAmt || 0);
-                handleChange('isNewReceipt', { isNewReceipt: false, gridData: gridData,
-                    totalAmount: totalAmount, creditAmt: (creditAmt || 0), debitAmt: (debitAmt || 0),
-                    remainingAmount: ((+totalAmount || 0) - (+expenseAmount || 0)) });
-            }));
+            if (state.receiptUuid) {
+                postData['uuid'] = state.receiptUuid;
+                props.dispatch(apiActions.methodAction('put', RECEIPTUPLOADAPI().PUT, postData, (res: any) => {
+                    let gridData = state.gridData.map((line: any) => {
+                        if (line.uuid === state.receiptUuid) {
+                            return postData;
+                        }
+                        return line;
+                    });
+                    gridRefresh(gridData);
+                }));
+            } else {
+                props.dispatch(apiActions.methodAction('post', RECEIPTUPLOADAPI().POST, postData, (res: any) => {
+                    let gridData = state.gridData.concat([res.data]);
+                    gridRefresh(gridData);
+                }));
+            }
         }
     };
+
+    const gridRefresh = (gridData: any) => {
+        let filterCredit = gridData.filter((line: any) => +line.transferId === 1);
+        let creditAmt = Aggregates.sum(filterCredit, 'amount');
+
+        let filterDebit = gridData.filter((line: any) => +line.transferId !== 1);
+        let debitAmt = Aggregates.sum(filterDebit, 'amount');
+
+        let totalAmount = (state.monthlyTotalAmount || 0) + (creditAmt || 0);
+        let expenseAmount = (+state.monthExpenseObj['expenseAmount'] || 0) + (debitAmt || 0);
+        handleChange('isNewReceipt', { isNewReceipt: false, gridData: gridData,
+            totalAmount: totalAmount, creditAmt: (creditAmt || 0), debitAmt: (debitAmt || 0),
+            remainingAmount: ((+totalAmount || 0) - (+expenseAmount || 0)) });
+    }
 
     const allocatedTemplate = () => {
         return <div className="bg-white col-sm-12 p-0 pt-2">
@@ -219,8 +237,8 @@ function Receiptupload(props: any) {
     }
 
     const categorySummaryTemplate = () => {
-        return <div className="bg-white col-sm-12 p-0">
-            <List className={listClasses.root}>
+        return <div className="col-sm-12 p-0">
+            <List className={listClasses.root + ' p-0'}>
                 {state.dropDownSource.map((types: any, ind: number) => {
                     let monthCategoryTypes = JSON.parse(state.monthExpenseObj['categoryTypes'] || `[]`).filter((category: any) => category.uuid === types.uuid);
                     let monthCategoryTypesObj = monthCategoryTypes[0] || {};
@@ -235,8 +253,7 @@ function Receiptupload(props: any) {
                     let remainAmt = (+monthCategoryTypesObj.amount || 0) + (sumVal || 0);
                     overallCategoryRemainAmt += +remainAmt || 0;
                     overallCategorySpentAmt += +sumDebitVal || 0;
-                    // let diffAmt = ((monthCategoryTypesObj.amount || 0) + (sumVal || 0)) < 0 ? true : false;
-                    return <ListItem className="border-bottom">
+                    return <ListItem className="border-bottom" style={+remainAmt < 0 ? {background: 'lavenderblush'} : {background: 'white'}}>
                         <div className={'col-12 col-sm-12'}>
                             <div className="col-sm-12">{types.categoryTypeName}</div>
                             <div className="row m-0">
@@ -253,11 +270,11 @@ function Receiptupload(props: any) {
                                 {+sumCreditVal > 0 ? <div className="col-6 col-sm-6 p-0" style={{color: 'green'}}>
                                     <span>Ct: {number2FormatFn(sumCreditVal || 0)}</span>
                                     <ArrowRightAltIcon style={{transform: `rotate(270deg)`}} />
-                                </div> :
-                                <div className="col-6 col-sm-6 p-0" style={{color: 'red'}}>
-                                    <span>Dt: {number2FormatFn(sumDebitVal || 0)}</span>
-                                    <ArrowRightAltIcon style={{transform: `rotate(90deg)`}} />
-                                </div>}
+                                </div> : sumDebitVal > 0 ?
+                                    <div className="col-6 col-sm-6 p-0" style={{color: 'red'}}>
+                                        <span>Dt: {number2FormatFn(sumDebitVal || 0)}</span>
+                                        <ArrowRightAltIcon style={{transform: `rotate(90deg)`}} />
+                                    </div> : <></>}
                             </div>
                         </div>
                     </ListItem>
@@ -301,11 +318,11 @@ function Receiptupload(props: any) {
                     </div>
                 })}
             </div> */}
-            <div className={"row m-0 py-2 " + (overallCategoryRemainAmt < 0 ? 'text-danger' : '')}>
-                <div className="col-6 col-sm-6">Categorywise Remaining Amount</div>
-                <div className="col-6 col-sm-6 fw-bold" align="right">{overallCategoryRemainAmt}</div>
+            <div className={"row m-0 py-3 border-bottom"} style={overallCategoryRemainAmt < 0 ? {background: 'lavenderblush'} : {background: '#d3efd3'}}>
+                <div className="col-8 col-sm-6 fw-bold">Category Expense Amount</div>
+                <div className="col-4 col-sm-6 fw-bold" align="right">{overallCategoryRemainAmt}</div>
             </div>
-            <div className={"row m-0 py-2 border-top border-bottom " + (((+state.remainingAmount) > (+state.totalAmount - (+overallCategorySpentAmt || 0))) ? 'text-danger' : '')}>
+            <div className={"row m-0 py-2 border-bottom d-none " + (((+state.remainingAmount) > (+state.totalAmount - (+overallCategorySpentAmt || 0))) ? 'text-danger' : '')}>
                 <div className="col-6 col-sm-6">Overall Saving Amount</div>
                 <div className={"col-6 col-sm-6 fw-bold"} align="right">
                     {(+state.totalAmount || 0) - (+overallCategorySpentAmt || 0)}
@@ -315,8 +332,8 @@ function Receiptupload(props: any) {
     }
 
     const bankSummaryTemplate = () => {
-        return <div className="bg-white col-sm-12 p-0">
-            <List className={listClasses.root}>
+        return <div className="col-sm-12 p-0">
+            <List className={listClasses.root + ' p-0'}>
                 {state.bankDropDownSource.map((types: any, ind: number) => {
                     let monthBankTypes = JSON.parse(state.monthExpenseObj['bankNames'] || `[]`).filter((bank: any) => bank.uuid === types.uuid);
                     let monthBankTypesObj = monthBankTypes[0] || {};
@@ -332,8 +349,7 @@ function Receiptupload(props: any) {
                     let remainAmt = (+monthBankTypesObj.amount || 0) + (sumVal || 0);
                     overallBankRemainAmt += +remainAmt || 0;
                     overallBankSpentAmt += +sumDebitVal || 0;
-                    // let diffAmt = ((monthBankTypesObj.amount || 0) + (sumVal || 0)) < 0 ? true : false;
-                    return <ListItem className="border-bottom">
+                    return <ListItem className="border-bottom" style={+remainAmt < 0 ? {background: 'lavenderblush'} : {background: 'white'}}>
                         <div className={'col-12 col-sm-12'}>
                             <div className="col-sm-12">{types.bankName}</div>
                             <div className="row m-0">
@@ -351,7 +367,7 @@ function Receiptupload(props: any) {
                                     <span>Ct: {number2FormatFn(sumCreditVal || 0)}</span>
                                     <ArrowRightAltIcon style={{transform: `rotate(270deg)`}} />
                                 </div>
-                                <div className="col-6 col-sm-6 p-0" align="right" style={{color: 'red'}}>
+                                <div className="col-6 col-sm-6 p-0" style={{color: 'red'}} align="right">
                                     <span>Dt: {number2FormatFn(sumDebitVal || 0)}</span>
                                     <ArrowRightAltIcon style={{transform: `rotate(90deg)`}} />
                                 </div>
@@ -393,11 +409,11 @@ function Receiptupload(props: any) {
                     </div>
                 })}
             </div> */}
-            <div className={"row m-0 py-2 " + (overallBankRemainAmt < 0 ? 'text-danger' : '')}>
-                <div className="col-6 col-sm-6">Bankwise Remaining Amount</div>
-                <div className="col-6 col-sm-6 fw-bold" align="right">{overallBankRemainAmt}</div>
+            <div className={"row m-0 py-3 border-bottom"} style={overallBankRemainAmt < 0 ? {background: 'lavenderblush'} : {background: '#d3efd3'}}>
+                <div className="col-8 col-sm-6 fw-bold">Bank Expense Amount</div>
+                <div className="col-4 col-sm-6 fw-bold" align="right">{overallBankRemainAmt}</div>
             </div>
-            <div className={"row m-0 py-2 border-top border-bottom " + (((+state.remainingAmount) > (+state.totalAmount - (+overallBankSpentAmt || 0))) ? 'text-danger' : '')}>
+            <div className={"row m-0 py-2 border-bottom d-none " + (((+state.remainingAmount) > (+state.totalAmount - (+overallBankSpentAmt || 0))) ? 'text-danger' : '')}>
                 <div className="col-6 col-sm-6">Overall Saving Amount</div>
                 <div className={"col-6 col-sm-6 fw-bold"} align="right">
                     {(+state.totalAmount || 0) - (+overallBankSpentAmt || 0)}
@@ -466,12 +482,14 @@ function Receiptupload(props: any) {
                     <IconButton edge="start" color="inherit" aria-label="menu"
                         onClick={() => {
                             props.dispatch(menuListAction.menuSelection(false));
-                            history.push('/\menu');
+                            history.push('/\home');
                         }}>
                         <ArrowBackIcon />
                     </IconButton>
-                    <Typography variant="h6" className="flex-grow-1">Receipt Upload</Typography>
-                    {compareHistoryMoveDate && <div className="text-danger fw-bold">Last Month Record Moved to Receipt History</div>}
+                    <div className="col py-2" style={{lineHeight: '16px'}}>
+                        <Typography variant="h6" className="flex-grow-1">Receipt Upload</Typography>
+                        {compareHistoryMoveDate && <div className="text-danger fw-bold pb-2">Last Month Record Moved to Receipt History</div>}
+                    </div>
                 </Toolbar>
             </div>
             <div className="position-relative" style={{zIndex: 1}}>
@@ -490,19 +508,19 @@ function Receiptupload(props: any) {
                             <Paper square elevation={0} className="border-bottom">
                                 <Tabs value={state.summaryTabIndex} indicatorColor="primary" textColor="primary"
                                     onChange={(event: any, value: number) => handleChange('summaryTabIndex', value)}>
-                                    <Tab label="Allocated Amount" {...tabProps(0)} />
-                                    <Tab label="Category Wise List" {...tabProps(1)} />
-                                    <Tab label="Bank Wise List" {...tabProps(2)} />
+                                    {/* <Tab label="Allocated Amount" {...tabProps(0)} /> */}
+                                    <Tab label="Category Expense" className="col-6" {...tabProps(0)} />
+                                    <Tab label="Bank Expense" className="col-6" {...tabProps(1)} />
                                 </Tabs>
                             </Paper>
                         </div>
-                        <TabPanel value={state.summaryTabIndex} index={0} className='p-0'>
+                        {/* <TabPanel value={state.summaryTabIndex} index={0} className='p-0'>
                             {allocatedTemplate()}
-                        </TabPanel>
-                        <TabPanel value={state.summaryTabIndex} index={1} className='p-0'>
+                        </TabPanel> */}
+                        <TabPanel value={state.summaryTabIndex} index={0} className='p-0'>
                             {categorySummaryTemplate()}
                         </TabPanel>
-                        <TabPanel value={state.summaryTabIndex} index={2} className='p-0'>
+                        <TabPanel value={state.summaryTabIndex} index={1} className='p-0'>
                             {bankSummaryTemplate()}
                         </TabPanel>
                     </> :
@@ -533,8 +551,8 @@ function Receiptupload(props: any) {
                 </TabPanel>
                 <TabPanel value={state.tabIndex} index={1} className='p-0'>
                     {Browser.isDeviceScreen ? <>
-                        <div className="p-2">
-                            <ButtonView variant="contained" color="primary" onClick={() => {
+                        <div className="p-2" align="right">
+                            <ButtonView className='text-primary' onClick={() => {
                                 if (isNullOrUndefinedOrEmpty(state.monthlyExpenseTemplateUuid)) {
                                     props.dispatch(alertAction.error('Please Create Monthly Expense For This Month'));
                                 } else {
@@ -542,10 +560,10 @@ function Receiptupload(props: any) {
                                 }
                             }} startIcon={<AddIcon></AddIcon>}>Add New</ButtonView>
                         </div>
-                        <List className={listClasses.root}>
+                        <List className={listClasses.root + (state.gridData.length ? ' d-block' : ' d-none')}>
                             {state.gridData.map((line: any, ind: number) => {
                                 return <ListItem className="border-bottom">
-                                    <ListItemAvatar>
+                                    <div className={'col-12 col-sm-12 row m-0'}>
                                         <Avatar variant="rounded" src={line.image} onClick={() => {
                                             if (line.image) {
                                                 handleChange('isImageView', {isImageView: true, imageData: line.image});
@@ -553,9 +571,15 @@ function Receiptupload(props: any) {
                                                 props.dispatch(alertAction.error('There is No Image'));
                                             }
                                         }}></Avatar>
-                                    </ListItemAvatar>
-                                    <ListItemText primary={line.categoryTypeName} secondary={moment(new Date(line.billDate)).format(SPACED_DATE_FORMAT)} />
-                                    <div>{number2FormatFn(line.amount)}</div>
+                                        <div className="col">
+                                            <div>{line.categoryTypeName}</div>
+                                            <div className="text-secondary">{moment(new Date(line.billDate)).format(SPACED_DATE_FORMAT)}</div>
+                                            <div className="fw-bold">{number2FormatFn(line.amount)}</div>
+                                        </div>
+                                        <div style={{width: '24px'}} className="p-0" onClick={() => handleChange('isNewReceipt', {...line, receiptUuid: line.uuid, isNewReceipt: true})}>
+                                            <EditIcon fontSize={'medium'} className="text-secondary"></EditIcon>
+                                        </div>
+                                    </div>
                                 </ListItem>
                             })}
                         </List>
@@ -580,16 +604,17 @@ function Receiptupload(props: any) {
                 </TabPanel>
             </div>
         </div>
-        <Dialog aria-labelledby="simple-dialog-title" open={state.isNewReceipt} className={'a-dialog-md'}>
+        <Dialog aria-labelledby="simple-dialog-title" open={state.isNewReceipt} className={'a-dialog-full'}>
             <DialogTitle id="simple-dialog-title" className="p-0">
-                <Toolbar className="border-bottom bg-white">
+                <Toolbar className="border-bottom bg-white pe-0">
                     <IconButton edge="start" color="inherit" aria-label="menu" onClick={() => handleChange('isNewReceipt', false)}>
                         <ArrowBackIcon />
                     </IconButton>
                     <Typography variant="h6" className="flex-grow-1">New Receipt Upload</Typography>
-                    <div className="p-2">
-                        <ButtonView variant="contained" color="primary" onClick={() => receiptupload()}>Save</ButtonView>
-                    </div>
+                    <ButtonView color="inherit" className='justify-content-end' onClick={() => receiptupload()}
+                        startIcon={<SaveIcon></SaveIcon>}>
+                        <span className="px-1 pt-1 d-none d-sm-block">Save</span>
+                    </ButtonView>
                 </Toolbar>
             </DialogTitle>
             <DialogContent>

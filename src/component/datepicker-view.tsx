@@ -10,7 +10,7 @@ export function DatePickerView(props: any) {
                 <KeyboardDatePicker margin="normal" label={props.label} format={props.format} variant="inline"
                     value={props.value} className={props.className} KeyboardButtonProps={{'aria-label': 'change date'}} disableToolbar
                     onChange={(value: any) => props.onChange(props.field, value)} autoOk={true} inputProps={{readOnly: true}}
-                    required={props.required} minDate={props.minDate} />
+                    required={props.required} minDate={props.minDate} disabled={props.disabled} />
             </Grid>
         </MuiPickersUtilsProvider>
     </>);

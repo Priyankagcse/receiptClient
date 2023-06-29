@@ -46,23 +46,23 @@ function CategoryType(props: any) {
     return (<>
         <Dialog aria-labelledby="simple-dialog-title" open={true} className={'a-dialog-md'}>
             <DialogTitle id="simple-dialog-title" className="p-0">
-                <Toolbar className="border-bottom bg-white">
+                <Toolbar className="border-bottom bg-white pe-0">
                     <IconButton edge="start" color="inherit" aria-label="menu" onClick={props.onClose}>
                         <ArrowBackIcon />
                     </IconButton>
-                    <Typography variant="h6" className="flex-grow-1">Add Category Type</Typography>
+                    <Typography variant="h6" className="flex-grow-1">Add Category</Typography>
                     <div className="p-2" align='right'>
-                        <ButtonView variant="contained" color="primary" onClick={() => categoryUpload()}>Save</ButtonView>
+                        <ButtonView className='text-primary' onClick={() => categoryUpload()}>Save</ButtonView>
                     </div>
                 </Toolbar>
             </DialogTitle>
             <DialogContent>
-                <div className="col-sm-12 mb-4">
-                    <TextFieldView label="Category Type" type={'text'} field={'categoryTypeName'} className={'col-sm-12'}
+                <div className="col-12 col-sm-12 mb-4">
+                    <TextFieldView label="Category Type" type={'text'} field={'categoryTypeName'} className={'col-12 col-sm-12'}
                         value={state.categoryTypeName} onChange={handleChange} />
                 </div>
-                <div className="col-sm-12 mb-4">
-                    <TextFieldView label="Description" className={'col-sm-12'} value={state.categoryDescription}
+                <div className="col-12 col-sm-12 mb-4">
+                    <TextFieldView label="Description" className={'col-12 col-sm-12'} value={state.categoryDescription}
                         onChange={handleChange} id="filled-multiline-static" multiline rows={4} type={'text'}
                         field={'categoryDescription'} />
                 </div>

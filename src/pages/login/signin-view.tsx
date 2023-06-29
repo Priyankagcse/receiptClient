@@ -8,7 +8,6 @@ import { menuListAction } from "../menulists/menulists-reducer";
 import { loginAction } from "./login-reducer";
 import { RegisterView } from "./register-view";
 import { ForgotPasswordView } from "./forgotpassword-view";
-import { MenuPageView } from "../menulists/menus-view";
 import { connect } from "react-redux";
 import { IState } from "src/initialload/state-interface";
 import { Dispatch } from "redux";
@@ -46,7 +45,6 @@ function SigninPage(props: any) {
                     <Switch>
                         <Route path="/home/:anyLink" component={HomeRouter} />
                         <Route path="/home" component={HomePageView} />
-                        <Route path="/menu" component={MenuPageView} />
                     </Switch>
                 </React.Fragment> :
                 <React.Fragment>

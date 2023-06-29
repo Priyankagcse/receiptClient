@@ -97,13 +97,12 @@ function MonthlyExpenseEdit(props: any) {
             arr.push(obj);
         }
         if (state.totalAmount < allocatedAmt + Aggregates.sum(arr, 'amount')) {
-            props.dispatch(alertAction.error('Allocated Amount Greater than the Current Total amount'));
-        } else {
-            setState((prevState: any) => ({
-                ...prevState,
-                [field]: arr
-            }));
+            // props.dispatch(alertAction.error('Allocated Amount Greater than the Current Total amount'));
         }
+        setState((prevState: any) => ({
+            ...prevState,
+            [field]: arr
+        }));
     };
 
     useEffect(() => {
@@ -127,12 +126,12 @@ function MonthlyExpenseEdit(props: any) {
         );
         if (isNullOrUndefinedOrEmpty(state.expenseMonth)) {
             props.dispatch(alertAction.error('Please Choose Epense Month'));
-        } else if (filterDate.length) {
+        } else if (filterDate.length && isNullOrUndefinedOrEmpty(props.headerData.uuid)) {
             props.dispatch(alertAction.error('This date is already selected so you can use that template.'));
         } else {
             let data = {
                 templateName: state.templateName,
-                totalAmount: state.totalAmount,
+                totalAmount: state.totalAmount || 0,
                 fromDate: moment(new Date(state.fromDate)).format("YYYY-MM-DD h:mm:ss"),
                 toDate: moment(new Date(state.toDate)).format("YYYY-MM-DD h:mm:ss"),
                 categoryTypes: (JSON.stringify(state.categoryTypes).toString())['replaceAll']('\\"', ''),
@@ -141,74 +140,88 @@ function MonthlyExpenseEdit(props: any) {
                 remainingAmount: +state.totalAmount - +state.expenseAmount,
                 expenseMonth: state.expenseMonth
             };
-            props.dispatch(apiActions.methodAction('post', MONTHLYEXPENSE().POST, data, (expense: any) => {
-                props.onClose({...expense.data, fromDate: data.fromDate, toDate: data.toDate});
-            }));
+            if (props.headerData.uuid) {
+                data['uuid'] = props.headerData.uuid;
+                props.dispatch(apiActions.methodAction('put', MONTHLYEXPENSE().PUT, data, (expense: any) => {
+                    props.onClose({...expense.data, fromDate: data.fromDate, toDate: data.toDate}, false);
+                }));
+            } else {
+                props.dispatch(apiActions.methodAction('post', MONTHLYEXPENSE().POST, data, (expense: any) => {
+                    props.onClose({...expense.data, fromDate: data.fromDate, toDate: data.toDate}, true);
+                }));
+            }
         }
     };
 
+    let disableField = props.headerData.uuid ? true : false;
     return (<div className="col-sm-12 bg-light">
         <div className="a-appbar">
-            <Toolbar className="border-bottom bg-white">
-                <IconButton edge="start" color="inherit" aria-label="menu" onClick={() => props.onClose()}>
+            <Toolbar className="border-bottom bg-white pe-0">
+                <IconButton edge="start" color="inherit" aria-label="menu" onClick={() => props.onClose({})}>
                     <ArrowBackIcon />
                 </IconButton>
                 <Typography variant="h6" className="flex-grow-1">Monthly Report</Typography>
-                {isNullOrUndefinedOrEmpty(props.headerData.uuid) && <ButtonView color="inherit" onClick={save}
+                <ButtonView color="inherit" className='justify-content-end' onClick={save}
                     startIcon={<SaveIcon></SaveIcon>}>
                     <span className="px-1 pt-1 d-none d-sm-block">Save</span>
-                </ButtonView>}
+                </ButtonView>
             </Toolbar>
         </div>
         <div className="col-sm-12 row m-0 a-appbar-minus">
-            <div className="a-heavy-bold py-2 fw-bold bg-white">
+            {/* <div className="a-heavy-bold py-2 fw-bold bg-white">
                 <span title="Current Total Amount">{`${state.totalAmount || 0} `}</span>
                 <span className="text-secondary">{`(Tot Amt)`}</span> -
                 <span title="Allocated Amount" className="ps-2">{`${state.expenseAmount || 0} `}</span>
                 <span className="text-secondary">{`(All Amt)`}</span> =
                 <span title="Remaining Amount" className="ps-2">{`${(state.totalAmount - state.expenseAmount) || 0} `}</span>
                 <span className="text-secondary">{`(Remaining Amt)`}</span>
-            </div>
+            </div> */}
             <div className="col-12 col-sm-4">
                 <div className="col-6 fw-bold px-0 py-2">Summary</div>
                 <div className="col-12 col-sm-12">
                     <DropDownView field={'expenseMonth'} label={'Expense Month'} value={state.expenseMonth} required
                         dataSource={monthLists} fields={{ text: 'text', value: 'value' }} onChange={handleChange}
-                        className={'col-12 col-sm-12 MuiFormControl-marginNormal'}></DropDownView>
+                        className={'col-12 col-sm-12 MuiFormControl-marginNormal'} disabled={disableField}></DropDownView>
                 </div>
                 <div className="col-12 col-sm-12">
                     <TextFieldView label="Template Name" type={'text'} field={'templateName'} className={'col-12 col-sm-12 MuiFormControl-marginNormal'}
-                        value={state.templateName} onChange={handleChange} />
+                        value={state.templateName} onChange={handleChange} disabled={disableField} />
                 </div>
-                <div className="col-12 col-sm-12">
+                {/* <div className="col-12 col-sm-12">
                     <TextFieldView label="Current Total Amount" type={'text'} field={'totalAmount'} className={'col-12 col-sm-12 MuiFormControl-marginNormal'}
                         value={state.totalAmount} onChange={handleChange} />
-                </div>
+                </div> */}
                 <div className="col-12 col-sm-12">
                     <DatePickerView format={"dd/MM/yyyy"} label="From Date" className="col-12 col-sm-12"
-                        value={state.fromDate} onChange={handleChange} field={'fromDate'}></DatePickerView>
+                        value={state.fromDate} onChange={handleChange} field={'fromDate'} disabled={disableField}></DatePickerView>
                 </div>
                 <div className="col-12 col-sm-12">
                     <DatePickerView format={"dd/MM/yyyy"} label="To Date" className="col-12 col-sm-12"
-                        value={state.toDate} onChange={handleChange} field={'toDate'} minDate={new Date(state.fromDate)}></DatePickerView>
+                        value={state.toDate} onChange={handleChange} field={'toDate'} minDate={new Date(state.fromDate)} disabled={disableField}></DatePickerView>
+                </div>
+            </div>
+            <div className="m-2 col p-0">
+                <div className="p-2 a-border-radius-10 " style={{background: 'antiquewhite'}}>
+                    <span className="fw-bold">Note: </span>
+                    <span>set your limited expnse for this month in your category and bank list</span>
                 </div>
             </div>
             <div className="col-12 col-sm-4">
                 <div className="col-12 p-0 row m-0">
-                    <div className="col-6 fw-bold px-0 py-2">Category Types</div>
-                    {isNullOrUndefinedOrEmpty(props.headerData.uuid) && <div className="col-12 col-sm-6" align="right">
+                    <div className="col-6 fw-bold px-0 py-2 d-flex align-items-center">Category Types</div>
+                    <div className="col-6 px-0 py-2" align="right">
                         <ButtonView variant="text" className="mx-2 text-primary"
                             onClick={() => handleChange('isCategoryType', true)}>
                             <AddIcon></AddIcon>
-                            <span>Add Category Type</span>
+                            <span>Category</span>
                         </ButtonView>
-                    </div>}
+                    </div>
                 </div>
                 {state.dropDownSource.map((category: any, index: number) => {
                     let categoryTypeName = (state.categoryTypes || []).filter((line: any) => line.uuid === category.uuid);
                     let valObj = categoryTypeName[0] || {};
                     return <div className="col-12 col-sm-12" key={index}>
-                        <TextFieldView type={'text'} field={category.uuid} label={category.categoryTypeName} placeholder={'Amount'}
+                        <TextFieldView type={'text'} field={category.uuid} label={category.categoryTypeName}
                             className={'col-12 col-sm-12 MuiFormControl-marginNormal'} value={valObj['amount']}
                             onChange={(field: string, value: number) => amountOnChanges('categoryTypes', value, category)} />
                     </div>;
@@ -216,22 +229,21 @@ function MonthlyExpenseEdit(props: any) {
             </div>
             <div className="col-12 col-sm-4">
                 <div className="col-12 p-0 row m-0">
-                    <div className="col-6 fw-bold px-0 py-2">Bank Names</div>
-                    {isNullOrUndefinedOrEmpty(props.headerData.uuid) && <div className="col-12 col-sm-6" align="right">
+                    <div className="col-6 fw-bold px-0 py-2 d-flex align-items-center">Bank Names</div>
+                    <div className="col-6 px-0 py-2" align="right">
                         <ButtonView variant="text" className="mx-2 text-primary"
                             onClick={() => handleChange('isBankName', true)}>
                             <AddIcon></AddIcon>
-                            <span>Add Bank Name</span>
+                            <span>Bank</span>
                         </ButtonView>
-                    </div>}
+                    </div>
                 </div>
                 {state.bankDropDownSource.map((bank: any, index: number) => {
                     let bankName = (state.bankNames || []).filter((line: any) => line.uuid === bank.uuid);
                     let valObj = bankName[0] || {};
                     return <div className="col-12 col-sm-12" key={index}>
                         <TextFieldView type={'text'} field={bank.uuid} label={bank.bankName}
-                            className={'col-12 col-sm-12 MuiFormControl-marginNormal'}
-                            value={valObj['amount']} placeholder={'Enter Your Limited Amount'}
+                            className={'col-12 col-sm-12 MuiFormControl-marginNormal'} value={valObj['amount']}
                             onChange={(field: string, value: number) => amountOnChanges('bankNames', value, bank)} />
                     </div>;
                 })}
