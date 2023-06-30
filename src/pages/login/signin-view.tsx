@@ -19,8 +19,10 @@ import { commonAction } from "src/common-reducer";
 function SigninPage(props: any) {
 
     useEffect(() => {
-        let accessToken: string = sessionStorage.getItem('accessToken');
-        let userUuid: string = sessionStorage.getItem('userUuid');
+        // let accessToken: string = sessionStorage.getItem('accessToken');
+        // let userUuid: string = sessionStorage.getItem('userUuid');
+        let accessToken: string = '';
+        let userUuid: string = null;
         props.dispatch(apiActions.methodAction('get', COMMONAPI(version, userUuid).VERSIONREFRESH, {}, (result: any) => {
             props.dispatch(loginAction.loginUserList(result.userList));
             props.dispatch(menuListAction.getMenuList(result.menuList));

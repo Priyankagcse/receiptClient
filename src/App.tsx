@@ -29,7 +29,8 @@ export function App() {
     );
 }
 
-let stringData = localStorage.getItem(`nila-${localStorage.getItem('loginUser')}`);
+// let stringData = localStorage.getItem(`nila-${localStorage.getItem('loginUser')}`);
+let stringData = '';
 let previousData: IState = {} as IState;
 if (stringData) {
     try {
@@ -60,7 +61,7 @@ function saveonClose() {
 window.addEventListener('beforeunload', saveonClose);
 
 window.onerror = () => {
-    localStorage.removeItem(`nila-${localStorage.getItem('loginUser')}`);
+    // localStorage.removeItem(`nila-${localStorage.getItem('loginUser')}`);
 };
 
 function saveLocalData() {
@@ -74,7 +75,7 @@ function saveLocalData() {
 
 export function saveData(state: object) {
     try {
-        localStorage.setItem(`nila-${localStorage.getItem('loginUser')}`, stringifyData(state));
+        // localStorage.setItem(`nila-${localStorage.getItem('loginUser')}`, stringifyData(state));
     } catch {
         console.log('Backup Failed');
     }
