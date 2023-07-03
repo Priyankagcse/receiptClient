@@ -27,7 +27,7 @@ function AppBarList(props: any) {
                 <ButtonView color="inherit" className={'align-items-end justify-content-end'} onClick={() => {
                     handleChange('isConfirm', true);
                 }} startIcon={<PowerSettingsNewIcon></PowerSettingsNewIcon>}>
-                    <span className="d-none d-sm-block">Hi Logout</span>
+                    <span className="d-none d-sm-block">Logout</span>
                 </ButtonView>
             </Toolbar>
         </AppBar>
