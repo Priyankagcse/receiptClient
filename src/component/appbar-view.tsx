@@ -27,20 +27,20 @@ function AppBarList(props: any) {
                 <ButtonView color="inherit" className={'align-items-end justify-content-end'} onClick={() => {
                     handleChange('isConfirm', true);
                 }} startIcon={<PowerSettingsNewIcon></PowerSettingsNewIcon>}>
-                    <span className="d-none d-sm-block">Logout</span>
+                    <span className="d-none d-sm-block">Hi Logout</span>
                 </ButtonView>
             </Toolbar>
         </AppBar>
         <Dialog open={state.isConfirm} onClose={() => handleChange('isConfirm', false)} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
             <DialogTitle id="alert-dialog-title">{"Do you want to Signout?"}</DialogTitle>
             <DialogActions>
-                <Button onClick={() => handleChange('isConfirm', false)} className="text-primary">Ok</Button>
                 <Button onClick={() => {
                     sessionStorage.removeItem('accessToken');
                     sessionStorage.removeItem('userUuid');
                     props.dispatch(loginAction.logoutRequest());
                     history.push('/login');
-                }} autoFocus>Cancel</Button>
+                }} className="text-primary">Ok</Button>
+                <Button onClick={() => handleChange('isConfirm', false)} autoFocus>Cancel</Button>
             </DialogActions>
         </Dialog>
     </div>);
