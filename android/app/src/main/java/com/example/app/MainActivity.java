@@ -10,23 +10,6 @@ import com.getcapacitor.BridgeActivity;
 
 //public class MainActivity extends BridgeActivity {}
 
-
-//public class MainActivity extends AppCompatActivity {
-//
-//    protected void onCreate (Bundle savedInstanceState) {
-//        super.onCreate (savedInstanceState);
-//        setContentView(R.layout.activity_main);
-//    }
-//
-////    public void onBackPressed () {
-////        Toast.makeText(MainActivity.this, "Back Button Pressed", Toast.LENGTH_SHORT).show();
-////    }
-//
-//    public void onBackPressed() {
-//        super.onBackPressed();
-//    }
-//}
-
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 

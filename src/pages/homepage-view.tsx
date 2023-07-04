@@ -205,7 +205,7 @@ function HomePage(props: any) {
                     sessionStorage.removeItem('accessToken');
                     sessionStorage.removeItem('userUuid');
                     props.dispatch(loginAction.logoutRequest());
-                }} className="text-primary">Ok</Button>
+                }} className="text-primary">OKAY</Button>
                 <Button onClick={() => props.dispatch(loginAction.homeToLogin(false))} autoFocus>Cancel</Button>
             </DialogActions>
         </Dialog>
