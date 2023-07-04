@@ -70,6 +70,7 @@ function HomePage(props: any) {
     useEffect(() => {
         refresh();
         return () => {
+            console.log(window.location);
             if ((window.location.href).indexOf('login') !== -1) {
                 history.push('/home');
                 props.dispatch(loginAction.homeToLogin(true));
