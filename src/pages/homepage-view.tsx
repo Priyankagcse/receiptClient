@@ -6,7 +6,7 @@ import { Dispatch } from "redux";
 import { MenuPageView } from "./menulists/menus-view";
 import BarChartIcon from '@material-ui/icons/BarChart';
 import { ReceiptChartView } from "./receiptupload/receiptchart";
-import { IconButton, MenuItem, Paper, Tab, Tabs, Toolbar, Typography } from "@material-ui/core";
+import { Button, Dialog, DialogActions, DialogTitle, IconButton, MenuItem, Paper, Tab, Tabs, Toolbar, Typography } from "@material-ui/core";
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { apiActions } from "src/action/action";
 import { COMMONAPI } from "src/apiurl";
@@ -14,6 +14,8 @@ import { Aggregates } from "src/helper/Aggregates";
 import { isNullOrUndefinedOrEmpty, number2FormatFn } from "src/common";
 import ArrowRightAltIcon from '@material-ui/icons/ArrowRightAlt';
 import { tabProps } from "src/component/tab-view";
+import { loginAction } from "./login/login-reducer";
+import { history } from "src/helper/history";
 
 function HomePage(props: any) {
     
@@ -67,6 +69,15 @@ function HomePage(props: any) {
 
     useEffect(() => {
         refresh();
+        return () => {
+            if ((window.location.href).indexOf('login') !== -1) {
+                history.push('/home');
+                props.dispatch(loginAction.homeToLogin(true));
+            } else {
+                history.push('/login');
+                props.dispatch(loginAction.homeToLogin(false));
+            }
+        }
     }, []);
 
     const refresh = () => {
@@ -186,12 +197,24 @@ function HomePage(props: any) {
     }
     return (<>
         {template}
+        <Dialog open={props.isConfirm} onClose={() => props.dispatch(loginAction.homeToLogin(false))} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
+            <DialogTitle id="alert-dialog-title">{"Do you want to Signout?"}</DialogTitle>
+            <DialogActions>
+                <Button onClick={() => {
+                    sessionStorage.removeItem('accessToken');
+                    sessionStorage.removeItem('userUuid');
+                    props.dispatch(loginAction.logoutRequest());
+                }} className="text-primary">Ok</Button>
+                <Button onClick={() => props.dispatch(loginAction.homeToLogin(false))} autoFocus>Cancel</Button>
+            </DialogActions>
+        </Dialog>
     </>);
 }
 
 const mapStateToProps = function(state: IState) {
     return {
-        
+        isConfirm: state.loginUser.isHomeToLogin,
+        loggingIn: state.loginUser.loggingIn
     };
 };
 

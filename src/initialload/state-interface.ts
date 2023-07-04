@@ -1,6 +1,6 @@
 export interface IState {
     loginUser: {
-        loggingIn: boolean, userLists: object[], loginCurrentUser: object
+        loggingIn: boolean, userLists: object[], loginCurrentUser: object, isHomeToLogin: boolean
     };
     menuList: {
         menus: any; isMenuSelect: boolean
