@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { IState } from "src/initialload/state-interface";
 import { Dispatch } from "redux";
 import { Accordion, AccordionDetails, AccordionSummary, Avatar, Dialog, DialogContent, DialogTitle, IconButton, ImageList,
-    ImageListItem, MenuItem, MuiThemeProvider, Paper, Tab, Tabs, Toolbar, Typography } from "@material-ui/core";
+    ImageListItem, List, ListItem, MenuItem, MuiThemeProvider, Paper, Tab, Tabs, Toolbar, Typography } from "@material-ui/core";
 import MUIDataTable from "mui-datatables";
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import moment from "moment";
@@ -18,6 +18,7 @@ import { COMMONAPI } from "src/apiurl";
 import { TabPanel, tabProps } from "src/component/tab-view";
 import { Aggregates } from "src/helper/Aggregates";
 import ArrowRightAltIcon from '@material-ui/icons/ArrowRightAlt';
+import { listStyles } from "src/commontheme-css";
 
 function ReceiptHistoryLine(props: any) {
     const SPACED_DATE_FORMAT = "DD MMM YYYY";
@@ -187,7 +188,7 @@ function ReceiptHistoryLine(props: any) {
 
     let creditList = (state.masterData['sumOfCategory'] || []).filter((line: any) => +line.transferId === 1);
     let debitList = (state.masterData['sumOfCategory'] || []).filter((line: any) => +line.transferId === 2);
-    
+    const listClasses = listStyles();
     return (<>
         <div className={"col-sm-12 bg-light a-appbar " + (props.caller === 'home' ? 'd-none' : '')}>
             <Toolbar className="border-bottom bg-white a-sticky-t0-z101">
@@ -274,7 +275,28 @@ function ReceiptHistoryLine(props: any) {
                 </div>
             </TabPanel>
             <TabPanel value={state.tabIndex} index={2} className='p-0'>
-                
+                <div className="py-2">
+                    <List className={listClasses.root + (state.gridData.length ? ' d-block' : ' d-none')}>
+                        {state.gridData.map((line: any, ind: number) => {
+                            return <ListItem className="border-bottom">
+                                <div className={'col-12 col-sm-12 row m-0'}>
+                                    <Avatar variant="rounded" src={line.image} onClick={() => {
+                                        if (line.image) {
+                                            handleChange('isImageView', {isImageView: true, imageData: line.image});
+                                        } else {
+                                            props.dispatch(alertAction.error('There is No Image'));
+                                        }
+                                    }}></Avatar>
+                                    <div className="col">
+                                        <div>{line.categoryTypeName}</div>
+                                        <div className="text-secondary">{moment(new Date(line.billDate)).format(SPACED_DATE_FORMAT)}</div>
+                                        <div className="fw-bold">{number2FormatFn(line.amount)}</div>
+                                    </div>
+                                </div>
+                            </ListItem>
+                        })}
+                    </List>
+                </div>
             </TabPanel>
         </div>
         <div className="a-appbar-minus d-none">

@@ -70,13 +70,21 @@ function HomePage(props: any) {
     useEffect(() => {
         refresh();
         return () => {
-            console.log(window.location);
-            if ((window.location.href).indexOf('login') !== -1) {
-                history.push('/home');
-                props.dispatch(loginAction.homeToLogin(true));
-            } else {
-                history.push('/login');
-                props.dispatch(loginAction.homeToLogin(false));
+            let urlName = window.location.href;
+            if (!isNullOrUndefinedOrEmpty(urlName)) {
+                let urlArrList = urlName.split('/');
+                if (urlArrList.length) {
+                    let getLastPathName = urlArrList[urlArrList.length - 1];
+                    if (!isNullOrUndefinedOrEmpty(getLastPathName)) {
+                        if (getLastPathName === 'login') {
+                            history.push('/home');
+                            props.dispatch(loginAction.homeToLogin(true));
+                        } else if (getLastPathName === 'home') {
+                            history.push('/login');
+                            props.dispatch(loginAction.homeToLogin(false));
+                        }
+                    }
+                }
             }
         }
     }, []);
@@ -199,13 +207,13 @@ function HomePage(props: any) {
     return (<>
         {template}
         <Dialog open={props.isConfirm} onClose={() => props.dispatch(loginAction.homeToLogin(false))} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
-            <DialogTitle id="alert-dialog-title">{"Do you want to Signout?"}</DialogTitle>
-            <DialogActions>
-                <Button onClick={() => {
+            <DialogTitle>{"Do you want to logout?"}</DialogTitle>
+            <DialogActions className="pb-3">
+                <Button variant="contained" color="primary" onClick={() => {
                     sessionStorage.removeItem('accessToken');
                     sessionStorage.removeItem('userUuid');
                     props.dispatch(loginAction.logoutRequest());
-                }} className="text-primary">OKAY</Button>
+                }}>Ok</Button>
                 <Button onClick={() => props.dispatch(loginAction.homeToLogin(false))} autoFocus>Cancel</Button>
             </DialogActions>
         </Dialog>
