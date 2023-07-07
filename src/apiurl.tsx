@@ -3,7 +3,6 @@ import { API_URL } from "./config";
 export const COMMONAPI = (firstParam?: any, secondParam?: any) => {
     return {
         RECEIPTRELATEDMASTER: API_URL + `getReceiptRelatedMaster/${firstParam}/${secondParam}`,
-        INITIALREFRESH: API_URL + `getInitialRefresh`,
         VERSIONREFRESH: API_URL + `versionRefresh/${firstParam}/${secondParam}`
     };
 };

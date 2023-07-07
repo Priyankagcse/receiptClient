@@ -1,13 +1,15 @@
 export let defaultValue = {
     loggingIn: false,
     userLists: [] as any,
-    loginCurrentUser: {}
+    loginCurrentUser: {},
+    isHomeToLogin: false
 };
 
 export interface IUser {
     loggingIn: boolean;
     userLists: object[];
     loginCurrentUser: object;
+    isHomeToLogin: boolean;
 }
 
 export interface IUserAct {
