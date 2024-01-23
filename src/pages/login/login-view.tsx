@@ -63,7 +63,7 @@ function LoginPageView(props: any) {
                             }
                         }} />
                     <br /><br />
-                    <Link className={'text-decoration-none'} to={'/forgotpassword'}>Forgot password?</Link>
+                    <Link className={'text-decoration-none'} to={'/forgotpassword'} style={{color: 'orange'}}>Forgot password?</Link>
                     <br /><br />
                     <div className="row m-0">
                         <div className="col-6 col-sm-6 p-0">
